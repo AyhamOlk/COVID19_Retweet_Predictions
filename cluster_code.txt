@@ -1,0 +1,50 @@
+
+modified = pd.read_csv("data/train.csv")
+modified.user_verified = (modified.user_verified).astype(int)
+modified.user_mentions = modified.user_mentions.fillna(0)
+modified.user_mentions = modified.user_mentions.apply(lambda x: 1 if type(x) is str and x!=0 else 0) 
+modified.urls = modified.urls.fillna(0)
+
+modified.urls = modified.urls.apply(lambda x: 1 if type(x) is str and x!=0 else 0) 
+modified.hashtags = modified.hashtags.fillna(0)
+
+modified.hashtags = modified.hashtags.apply(lambda x: 1 if type(x) is str and x!=0 else 0) 
+modified.text = modified.text.fillna(0)
+
+modified.text = modified.text.apply(lambda x: len(x) if type(x) is str and x!=0 else 0) 
+
+
+
+x_less_300 = modified[modified.retweet_count<=300]
+x_greater_300 = modified[modified.retweet_count>300]
+
+x_sampled = pd.concat([x_less_300.sample(n=21112, random_state=1), x_greater_300], axis=0)
+
+y_sampled = x_sampled.retweet_count
+y_sampled = y_sampled.apply(lambda x: 1 if x>300 else 0)
+
+x_sampled = x_sampled.drop('retweet_count', 1)
+
+
+
+#based on my test 2 was good
+clf = RandomForestClassifier(max_depth=2, random_state=0)
+clf.fit(x_sampled, y_sampled)
+
+
+
+validation_data = pd.read_csv("data/evaluation.csv")
+validation_data.user_verified = (validation_data.user_verified).astype(int)
+validation_data.user_mentions = validation_data.user_mentions.fillna(0)
+validation_data.user_mentions = validation_data.user_mentions.apply(lambda x: 1 if type(x) is str and x!=0 else 0) 
+validation_data.urls = validation_data.urls.fillna(0)
+
+validation_data.urls = validation_data.urls.apply(lambda x: 1 if type(x) is str and x!=0 else 0) 
+validation_data.hashtags = validation_data.hashtags.fillna(0)
+
+validation_data.hashtags = validation_data.hashtags.apply(lambda x: 1 if type(x) is str and x!=0 else 0) 
+validation_data.text = validation_data.text.fillna(0)
+
+validation_data.text = validation_data.text.apply(lambda x: len(x) if type(x) is str and x!=0 else 0) 
+
+
